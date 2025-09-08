@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Excel Column Analyzer | Free Online Tool for Data Insights</title>
+  <meta name="description" content="Analyze Excel columns online for free. Get value counts, statistics, and visualizations instantly with the Excel Column Analyzer by Dominik Weckmüller.">
+  <meta name="author" content="Dominik Weckmüller">
+  <meta name="robots" content="index, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+  <!-- Header -->
+  <header class="text-center py-10 bg-white shadow">
+    <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Excel Column Analyzer</h1>
+    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">
+      A minimalist online tool to <strong>analyze Excel column data</strong>, count unique values, and visualize results instantly.
+    </p>
+  </header>
+
+  <!-- Main Container (Full Width) -->
+  <main class="w-full px-4 md:px-12 lg:px-20 py-10 space-y-12">
+    
+    <!-- Instructions -->
+    <section class="bg-white shadow rounded-2xl p-6 w-full">
+      <h2 class="text-xl font-semibold text-blue-600 mb-3">How to Use</h2>
+      <p class="text-gray-600 mb-4">
+        Paste a single Excel column below, choose whether to ignore the header row, and click <b>Analyze</b>. 
+        The tool will generate statistics and a bar chart of unique values.
+      </p>
+
+      <textarea id="excelInput" placeholder="Paste Excel column here..."
+        class="w-full h-40 p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none mb-4"></textarea>
+
+      <div class="flex items-center space-x-2 mb-4">
+        <input type="checkbox" id="ignoreHeader" class="rounded text-blue-600 focus:ring-blue-400">
+        <label for="ignoreHeader" class="text-sm text-gray-700">Ignore first row (header)</label>
+      </div>
+
+      <button onclick="analyze()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition">
+        Analyze
+      </button>
+    </section>
+
+    <!-- Stats -->
+    <div id="stats" class="hidden bg-white shadow rounded-2xl p-6 text-sm text-gray-700 w-full"></div>
+
+    <!-- Chart -->
+    <div id="chartContainer" class="hidden bg-white shadow rounded-2xl p-6 w-full">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <!-- About -->
+    <section class="bg-white shadow rounded-2xl p-6 w-full">
+      <h2 class="text-xl font-semibold text-blue-600 mb-3">About This Tool</h2>
+      <p class="text-gray-600">
+        The <strong>Excel Column Analyzer</strong> is a free and open-source project designed to simplify quick data analysis tasks. 
+        Whether you're cleaning data, spotting duplicates, or summarizing values, this tool makes it effortless.
+      </p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="bg-white shadow rounded-2xl p-6 w-full">
+      <h2 class="text-xl font-semibold text-blue-600 mb-4">Frequently Asked Questions</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <details class="group">
+          <summary class="cursor-pointer font-medium text-gray-800 group-open:text-blue-600">What is the Excel Column Analyzer?</summary>
+          <p class="mt-2 text-gray-600 text-sm">It’s a free online tool that lets you paste an Excel column and instantly analyze unique values, counts, and generate charts.</p>
+        </details>
+        <details class="group">
+          <summary class="cursor-pointer font-medium text-gray-800 group-open:text-blue-600">Is the tool free to use?</summary>
+          <p class="mt-2 text-gray-600 text-sm">Yes! It’s free and open-source.</p>
+        </details>
+        <details class="group">
+          <summary class="cursor-pointer font-medium text-gray-800 group-open:text-blue-600">Who created it?</summary>
+          <p class="mt-2 text-gray-600 text-sm">The tool was built by <a href="https://geo.rocks" class="text-blue-600 hover:underline" target="_blank">Dominik Weckmüller</a>.</p>
+        </details>
+        <details class="group">
+          <summary class="cursor-pointer font-medium text-gray-800 group-open:text-blue-600">Do I need to upload my file?</summary>
+          <p class="mt-2 text-gray-600 text-sm">No. Just copy & paste your column — analysis runs entirely in your browser.</p>
+        </details>
+        <details class="group">
+          <summary class="cursor-pointer font-medium text-gray-800 group-open:text-blue-600">Where’s the source code?</summary>
+          <p class="mt-2 text-gray-600 text-sm">On GitHub: 
+            <a href="https://github.com/do-me/excel-column-analyzer" target="_blank" class="text-blue-600 hover:underline">Excel Column Analyzer Repository</a>.
+          </p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-500 mt-12 py-6 border-t">
+    <p>
+      📂 Open-source on 
+      <a href="https://github.com/do-me/excel-column-analyzer" class="text-blue-600 hover:underline" target="_blank">GitHub</a> 
+      | ✍️ Author: 
+      <a href="https://geo.rocks" class="text-blue-600 hover:underline" target="_blank">Dominik Weckmüller</a>
+    </p>
+  </footer>
+
+  <!-- Script -->
+  <script>
+    let chart;
+
+    function analyze() {
+      const input = document.getElementById("excelInput").value.trim();
+      const ignoreHeader = document.getElementById("ignoreHeader").checked;
+      if (!input) return;
+
+      let rows = input.split(/\r?\n/).map(r => r.trim()).filter(r => r);
+
+      if (ignoreHeader && rows.length > 0) {
+        rows = rows.slice(1);
+      }
+
+      if (rows.length === 0) return;
+
+      const counts = {};
+      rows.forEach(row => {
+        counts[row] = (counts[row] || 0) + 1;
+      });
+
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      const labels = sorted.map(item => item[0]);
+      const values = sorted.map(item => item[1]);
+
+      const totalRows = rows.length;
+      const uniqueCount = labels.length;
+      const topValue = labels[0];
+      const topCount = values[0];
+
+      const statsDiv = document.getElementById("stats");
+      statsDiv.classList.remove("hidden");
+      statsDiv.innerHTML = `
+        <b class="text-gray-800">Statistics:</b><br>
+        Total rows analyzed: ${totalRows}<br>
+        Unique values: ${uniqueCount}<br>
+        Most frequent value: <span class="text-blue-600 font-medium">"${topValue}"</span> (${topCount} times)
+      `;
+
+      document.getElementById("chartContainer").classList.remove("hidden");
+
+      if (chart) chart.destroy();
+
+      const ctx = document.getElementById("chart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Counts',
+            data: values,
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Unique Value Counts (Descending)',
+              color: '#1f2937',
+              font: { size: 16, weight: 'bold' }
+            }
+          },
+          scales: {
+            x: { 
+              beginAtZero: true, 
+              title: { display: true, text: 'Count', color: '#374151' },
+              ticks: { color: '#374151' }
+            },
+            y: { 
+              ticks: { color: '#374151' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
