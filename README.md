@@ -2,6 +2,10 @@
 
 Excel Column Analyzer is a free, web-based tool that allows you to quickly analyze a single column from Excel or any spreadsheet. It counts unique values, displays statistics, and generates a horizontal bar chart to visualize the data. The data stays in your browser and is fully private.
 
+<img width="1527" height="804" alt="image" src="https://github.com/user-attachments/assets/0f023bf3-83af-4523-bca2-73591487dbc1" />
+<img width="1451" height="1319" alt="image" src="https://github.com/user-attachments/assets/45e57fc1-772c-4794-bc1d-7a0fcd667900" />
+
+
 ## Features
 
 - Count total rows and unique values
@@ -22,8 +26,7 @@ Excel Column Analyzer is a free, web-based tool that allows you to quickly analy
 
 ## Demo
 
-You can try the tool directly in your browser:  
-[Excel Column Analyzer](https://github.com/do-me/excel-column-analyzer)
+You can try the tool directly in your browser: [Excel Column Analyzer](https://github.com/do-me/excel-column-analyzer)
 
 ## Installation
 
